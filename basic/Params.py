@@ -38,3 +38,7 @@ def interval(start, stop=None, step=1):
         result.append(i)
         i += step
     return result
+
+print interval(10)
+print interval(1, 5)
+print interval(3, 12, 4)
