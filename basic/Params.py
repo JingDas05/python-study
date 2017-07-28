@@ -7,24 +7,24 @@ def story(**kwds):
     return 'story 函数接受到的参数' '%(job)s called %(name)s.' % kwds
 
 
-print story(job='wusi', name='rich')
+print(story(job='wusi', name='rich'))
 # 注意这个地方添加**
-print story(**params)
+print(story(**params))
 del params['name']
-print story(name='yuanyuan ', **params)
+print(story(name='yuanyuan ', **params))
 
 
 def power(x, y, *others):
     if others:
-        print '接受到的额外参数是:', others
+        print('接受到的额外参数是:', others)
     return pow(x, y)
 
 
-print power(2, 3)
-print power(x=3, y=2)
+print(power(2, 3))
+print(power(x=3, y=2))
 params = (5,) * 2
-print power(*params)
-print power(3, 3, 'hello world')
+print(power(*params))
+print(power(3, 3, 'hello world'))
 
 
 def interval(start, stop=None, step=1):
@@ -39,6 +39,7 @@ def interval(start, stop=None, step=1):
         i += step
     return result
 
-print interval(10)
-print interval(1, 5)
-print interval(3, 12, 4)
+
+print(interval(10))
+print(interval(1, 5))
+print(interval(3, 12, 4))
