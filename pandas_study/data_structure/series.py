@@ -29,4 +29,11 @@ s = pd.Series(np.random.randn(5), index=['a', 'b', 'c', 'd', 'e'])
 # print(s * 2)
 # print(np.exp(s))
 # -1 是指最后一个元素不要
-print(s[1:] + s[:-1])
+# print(s[1:] + s[:-1])
+
+s_name = pd.Series(np.random.randn(5), name='something')
+print(s_name)
+print(s_name.name)
+s_name.rename('different')
+print(s_name.name)
+
