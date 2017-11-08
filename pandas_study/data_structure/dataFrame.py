@@ -10,15 +10,15 @@ d = {'one': pd.Series([1., 2., 3.], index=['a', 'b', 'c']),
 df = pd.DataFrame(d)
 df['three'] = df['one'] * df['two']
 df['flag'] = df['one'] > 2
-print(df)
+# print(df)
 # Operation	                           Syntax	        Result
 # Select column	                      df[col]	        Series
 # Select row by label	             df.loc[label]    	Series
 # Select row by integer location	  df.iloc[loc]	    Series
 # Slice rows	                      df[5:10]	        DataFrame
 # Select rows by boolean vector	      df[bool_vec]	    DataFrame
-print(df.loc['b'])
-print(df.iloc[1])
+# print(df.loc['b'])
+# print(df.iloc[1])
 
 
 # print(pd.DataFrame(d)['one']['a'])
@@ -75,3 +75,32 @@ print(df.iloc[1])
 #          PetalRatio=lambda x: x.PetalWidth / x.PetalLength)
 #  .plot(kind='scatter', x='SepalRatio', y='PetalRatio'))
 # plt.show()
+
+# df = pd.DataFrame(np.random.randn(10, 4), columns=['A', 'B', 'C', 'D'])
+# print(df)
+# df2 = pd.DataFrame(np.random.randn(7, 3), columns=['A', 'B', 'C'])
+# print(df2)
+
+# print(list('ABC'))
+index = pd.date_range('1/1/2000', periods=8)
+df = pd.DataFrame(np.random.randn(8, 3), index=index, columns=list('ABC'))
+# print(df)
+# 矩阵转置
+# print(df[:3].T)
+# 矩阵开方
+# print(np.sqrt(df))
+# 矩阵乘积
+# print(df.T.dot(df))
+# print(type(df['A']))
+# print(df.sub(df['A'], axis=0))
+# print(df * 5 + 2)
+# print(1 / df)
+# print(df ** 4)
+print(np.arange(5, 10))
+
+# df1 = pd.DataFrame({'a': [1, 0, 1], 'b': [0, 1, 1]}, dtype=bool)
+# df2 = pd.DataFrame({'a': [0, 1, 1], 'b': [1, 1, 0]}, dtype=bool)
+# print(df1 & df2)
+# print(df1 | df2)
+# print(df1 ^ df2)
+# print(-df1)
