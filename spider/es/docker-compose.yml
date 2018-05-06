@@ -1,18 +1,18 @@
 version: '2.2'
 services:
-  elasticsearch:
+  elasticsearch1:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
-    container_name: elasticsearch
+    container_name: elasticsearch1
     environment:
-      - cluster.name=docker-cluster
+      - cluster.name=wind-data
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms4096m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms4096m -Xmx4096m"
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - esdata1:/usr/share/elasticsearch/data
+      - /home/wusi/elastic/data1:/usr/share/elasticsearch/data
     ports:
       - 9200:9200
     networks:
@@ -21,34 +21,38 @@ services:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
     container_name: elasticsearch2
     environment:
-      - cluster.name=docker-cluster
+      - cluster.name=wind-data
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - "discovery.zen.ping.unicast.hosts=elasticsearch"
+      - "ES_JAVA_OPTS=-Xms4096m -Xmx4096m"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch1"
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - esdata2:/usr/share/elasticsearch/data
+      - /home/wusi/elastic/data2:/usr/share/elasticsearch/data
     networks:
       - esnet
+    links:
+      - elasticsearch1
   elasticsearch3:
     image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
     container_name: elasticsearch3
     environment:
-      - cluster.name=docker-cluster
+      - cluster.name=wind-data
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-      - "discovery.zen.ping.unicast.hosts=elasticsearch"
+      - "ES_JAVA_OPTS=-Xms4096m -Xmx4096m"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch1"
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - esdata2:/usr/share/elasticsearch/data
+      - /home/wusi/elastic/data3:/usr/share/elasticsearch/data
     networks:
       - esnet
+    links:
+      - elasticsearch1
 
 volumes:
   esdata1:
@@ -60,3 +64,4 @@ volumes:
 
 networks:
   esnet:
+    driver: bridge
