@@ -5,11 +5,14 @@
 
 from pyspider.libs.base_handler import *
 import hashlib
+from pyspider import database
 
 
 class Handler(BaseHandler):
     crawl_config = {
     }
+
+    projectdb = database.connect_database('elasticsearch+projectdb://127.0.0.1:9200/?index=author')
 
     @every(minutes=1)
     def on_start(self):
@@ -64,7 +67,7 @@ class Handler(BaseHandler):
             flower["owner_name"] = author["name"]
             flower["sender_name"] = flower_row("a").text()
             flower_num = flower_row("font").text()[1:-1]
-            flower["flower_num"] = "1" if flower_num=="" else flower_num
+            flower["flower_num"] = "1" if flower_num == "" else flower_num
             flower_recorders.append(flower)
         print(flower_recorders)
-        print(author)
+        self.projectdb.es.index("author", "basic", author, author["id"])

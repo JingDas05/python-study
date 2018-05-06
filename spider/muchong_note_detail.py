@@ -6,11 +6,14 @@
 from pyspider.libs.base_handler import *
 import hashlib
 import re
+from pyelasticsearch import ElasticSearch
 
 
 class Handler(BaseHandler):
     crawl_config = {
     }
+
+    es = ElasticSearch('http://localhost:9200/')
 
     # 楼主帖子id
     first_floor_id = ""
