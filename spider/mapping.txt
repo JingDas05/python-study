@@ -1,0 +1,56 @@
+PUT author
+{
+  "mappings": {
+    "basic": {
+      "properties": {
+        "id": {
+          "type": "keyword"
+        },
+        "register_time": {
+          "type": "date",
+          "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+        },
+        "insect_num": {
+          "type": "text"
+        },
+        "name": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "sex": {
+          "type": "text"
+        },
+        "birthday_time": {
+          "type": "date",
+          "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
+        },
+        "coin_num": {
+          "type": "integer"
+        },
+        "major": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "help_num": {
+          "type": "integer"
+        },
+        "grant_num": {
+          "type": "integer"
+        },
+        "fans_num": {
+          "type": "integer"
+        },
+        "flower_num": {
+          "type": "integer"
+        },
+        "note_num": {
+          "type": "long"
+        }
+      }
+    }
+  }
+}
+
+
