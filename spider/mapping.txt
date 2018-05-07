@@ -4,14 +4,11 @@ PUT author
     "basic": {
       "properties": {
         "id": {
-          "type": "keyword"
+          "type": "text"
         },
         "register_time": {
           "type": "date",
           "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
-        },
-        "insect_num": {
-          "type": "text"
         },
         "name": {
           "type": "text",
@@ -47,6 +44,101 @@ PUT author
         },
         "note_num": {
           "type": "long"
+        }
+      }
+    }
+  }
+}
+
+
+DELETE author
+
+
+POST author/basic
+{
+  "register_time":"2015-01-01 12:10:30",
+  "name":"中华人民共和国"
+}
+GET author/basic/_search
+{
+  "query": {
+    "match": {
+      "name": "人民"
+    }
+  }
+}
+
+PUT note
+{
+  "mappings": {
+    "basic": {
+      "properties": {
+        "id": {
+          "type": "keyword"
+        },
+        "target_id": {
+          "type": "keyword"
+        },
+        "title": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word",
+          "copy_to": "source_all"
+        },
+        "content": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word",
+          "copy_to": "source_all"
+        },
+        "floor": {
+          "type": "integer"
+        },
+        "device": {
+          "type": "keyword"
+        },
+        "first_category_name": {
+          "type": "text"
+        },
+        "second_category_name": {
+          "type": "text"
+        },
+        "third_category_name": {
+          "type": "text"
+        },
+        "author_id": {
+          "type": "text"
+        },
+        "source_all": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        }
+      }
+    }
+  }
+}
+
+PUT flower
+{
+  "mappings": {
+    "relation": {
+      "properties": {
+        "owner_id": {
+          "type": "text"
+        },
+        "owner_name": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "sender_name": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "flower_num": {
+          "type": "integer"
         }
       }
     }

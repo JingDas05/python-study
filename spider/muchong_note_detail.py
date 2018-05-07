@@ -98,10 +98,9 @@ class Handler(BaseHandler):
             note["target_id"] = target_id
             note["content"] = content
             note["device"] = device
-            # 发布设备
-            # note["device"] = content_area.find("font[class='gray_ext'] a")
-            # 楼主主题
-            # note["title"] = content_area.find("h1").text()
-            # 回复的目标帖子id,包含了发帖人虫名， 发帖时间，以及楼层
-            # note["reply_target_content_id"] = content_area.find("fieldset div").text()
+            note["first_category_name"] = ""
+            note["second_category_name"] = ""
+            note["third_category_name"] = ""
+            # 就设定为虫号吧
+            note["author_id"] = ""
             print(note)

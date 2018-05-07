@@ -28,7 +28,7 @@ class Handler(BaseHandler):
 
     @config(age=1)
     def index_page(self, response):
-        hl_md5 = hashlib.md5()
+        # hl_md5 = hashlib.md5()
         # 作者信息字典
         author = {}
         # 获取整个doc
@@ -39,7 +39,8 @@ class Handler(BaseHandler):
         author["register_time"] = basic_information("td:eq(0)").text()
         # 其他基本信息(有三个class 为userinfo的table, 选取第二个)
         basic_information = context("table.userinfo:eq(1)")
-        author["insect_num"] = basic_information("tr:eq(0) td:eq(0)").text()
+        # 虫号即id
+        author["id"] = basic_information("tr:eq(0) td:eq(0)").text()
         author["name"] = context("div.space_index").find("a:eq(0)").text()
         author["sex"] = basic_information("tr:eq(4) td:eq(0)").text()
         author["birthday_time"] = basic_information("tr:eq(4) td:eq(2)").text()
@@ -54,20 +55,17 @@ class Handler(BaseHandler):
         author["fans_num"] = composite_info[0][composite_info[0].find(":"):]
         author["flower_num"] = composite_info[1][composite_info[1].find(":"):]
         author["note_num"] = composite_info[3][composite_info[3].find(":"):]
-        # 生成id
-        raw_id = (author["insect_num"] + author["register_time"]).replace(" ", "")
-        hl_md5.update(raw_id.encode(encoding='utf-8'))
-        author["id"] = hl_md5.hexdigest()
+        # 生成id，虫号
+        #raw_id = (author["insect_num"]).replace(" ", "")
+        #hl_md5.update(raw_id.encode(encoding='utf-8'))
+        #author["id"] = hl_md5.hexdigest()
         # 查看获取的红花
         flowers = context("table.userinfo:eq(2)").find("table")("tr td")
         flower_recorders = []
         for flower_row in flowers.items():
-            flower = {}
-            flower["owner_id"] = author["id"]
-            flower["owner_name"] = author["name"]
-            flower["sender_name"] = flower_row("a").text()
+            flower = {"owner_id": author["id"], "owner_name": author["name"], "sender_name": flower_row("a").text()}
             flower_num = flower_row("font").text()[1:-1]
             flower["flower_num"] = "1" if flower_num == "" else flower_num
             flower_recorders.append(flower)
         print(flower_recorders)
-        self.projectdb.es.index("author", "basic", author, author["id"])
+        self.projectdb.es.index("author", "basic", author)
