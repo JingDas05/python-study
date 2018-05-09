@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-# Created on 2018-05-06 08:44:11
-# Project: muchong_note_detail
+# Created on 2018-05-07 07:58:37
+# Project: main
 
 from pyspider.libs.base_handler import *
 import hashlib
@@ -10,9 +10,9 @@ import re
 
 class Handler(BaseHandler):
     crawl_config = {
+
     }
 
-    # 楼主帖子id
     first_floor_id = ""
 
     # 处理帖子内容的方法，获取 回帖target_id, 帖子内容，发帖客户端
@@ -52,9 +52,10 @@ class Handler(BaseHandler):
                     device = "PC"
                 return target_id, content, device
 
+    # 入口方法
     @every(minutes=1)
     def on_start(self):
-        self.crawl('http://muchong.com/t-12233935-1', callback=self.handle_note, cookies={
+        self.crawl('http://muchong.com/bbs', callback=self.index_page, cookies={
             "Hm_lpvt_2207ecfb7b2633a3bc5c4968feb58569": "1522564279",
             "Hm_lvt_2207ecfb7b2633a3bc5c4968feb58569": "1522564172",
             "_discuz_pw": "9a1449a8990d49a6",
@@ -65,6 +66,69 @@ class Handler(BaseHandler):
         })
 
     @config(age=1)
+    def index_page(self, response):
+        context = response.doc
+        for each_area in context.find("div.forum_Box.bg_global.xmc_line_lr.xmc_line_bno").items():
+            self.handle_first_area(each_area("h2 strong").text(), each_area("table"))
+
+    # 处理一级板块，比如 网络生活区等
+    def handle_first_area(self, first_area_name, second_area_table):
+        second_area = second_area_table.find("td")
+        for each_second_area in second_area.items():
+            second_area_link = each_second_area.find("div.xmc_fl.xmc_forum_width h4.xmc_blue a")
+            second_area_name = second_area_link.text()
+            second_area_href = second_area_link.attr("href")
+            self.handle_second_area(first_area_name, second_area_name, second_area_href)
+
+    # 处理二级板块,比如 休闲灌水等，这个时候进入的是分页的首页 url: http://muchong.com/f-6-1
+    def handle_second_area(self, first_area_name, second_area_name, second_area_href):
+        if first_area_name != "" and second_area_name != "" and second_area_href != "":
+            self.crawl(second_area_href, callback=self.second_index_page, cookies={
+                "Hm_lpvt_2207ecfb7b2633a3bc5c4968feb58569": "1522564279",
+                "Hm_lvt_2207ecfb7b2633a3bc5c4968feb58569": "1522564172",
+                "_discuz_pw": "9a1449a8990d49a6",
+                "_discuz_uid": "3302227",
+                "_emuch_index": "1",
+                "_ga": "GA1.2.1902872401.1522564172",
+                "_gat": "1"
+            })
+
+    # 统计二级分类下的全部帖子，分页爬取
+    def second_index_page(self, response):
+        context = response.doc
+        total_page = context.find("td.header:eq(1)").text()
+        total_page = total_page[total_page.find("/") + 1:]
+        basic_url = response.url
+        # 循环遍历每页
+        for page in range(int("1")):
+            each_page_url = basic_url[:basic_url.rfind("-") + 1] + str(page + 1)
+            self.crawl(each_page_url, callback=self.handle_each_second_index_page, cookies={
+                "Hm_lpvt_2207ecfb7b2633a3bc5c4968feb58569": "1522564279",
+                "Hm_lvt_2207ecfb7b2633a3bc5c4968feb58569": "1522564172",
+                "_discuz_pw": "9a1449a8990d49a6",
+                "_discuz_uid": "3302227",
+                "_emuch_index": "1",
+                "_ga": "GA1.2.1902872401.1522564172",
+                "_gat": "1"
+            })
+
+    # 处理二级分类下的每一页
+    def handle_each_second_index_page(self, response):
+        context = response.doc
+        notes_titles = context.find("th.thread-name")
+        for each_note in notes_titles.items():
+            if each_note is not None:
+                self.crawl(each_note("span a").attr("href"), callback=self.handle_note, cookies={
+                    "Hm_lpvt_2207ecfb7b2633a3bc5c4968feb58569": "1522564279",
+                    "Hm_lvt_2207ecfb7b2633a3bc5c4968feb58569": "1522564172",
+                    "_discuz_pw": "9a1449a8990d49a6",
+                    "_discuz_uid": "3302227",
+                    "_emuch_index": "1",
+                    "_ga": "GA1.2.1902872401.1522564172",
+                    "_gat": "1"
+                })
+
+    # 处理二级分类下的每一页的帖子
     def handle_note(self, response):
         # 获取整个doc
         context = response.doc
@@ -95,11 +159,13 @@ class Handler(BaseHandler):
             note["target_id"] = target_id
             note["content"] = content
             note["device"] = device
-            category_names = context.find("span.breadcrumb")
-            # 一级分类名称
-            note["first_category_name"] = category_names("a:eq(1)").text()
-            # 二级分类名称
-            note["second_category_name"] = category_names("a:eq(2)").text()
-            # 三级分类名称
-            note["third_category_name"] = category_names("a:eq(3)").text()
+            # 发布设备
+            # note["device"] = content_area.find("font[class='gray_ext'] a")
+            # 楼主主题
+            # note["title"] = content_area.find("h1").text()
+            # 回复的目标帖子id,包含了发帖人虫名， 发帖时间，以及楼层
+            # note["reply_target_content_id"] = content_area.find("fieldset div").text()
             print(note)
+
+
+
