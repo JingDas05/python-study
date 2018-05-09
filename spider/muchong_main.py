@@ -16,7 +16,7 @@ class Handler(BaseHandler):
     first_floor_id = ""
 
     # 处理帖子内容的方法，获取 回帖target_id, 帖子内容，发帖客户端
-    def handleContent(self, content_area, first_floor_id):
+    def handle_content(self, content_area, first_floor_id):
         hl_md5 = hashlib.md5()
         # 原生帖子内容, eg: 引用回帖:4楼:Originallypostedby含笑木香at2018-04-0321:08:49比如我，最喜欢暴风雨的时候睡懒觉，
         # 我也很喜欢啊，别人怕暴风雨，我是遇到暴风雨就兴奋发自小木虫IOS客户端
@@ -93,14 +93,14 @@ class Handler(BaseHandler):
                 "_gat": "1"
             })
 
-    # 处理点击休闲灌水后的操作
+    # 统计二级分类下的全部帖子，分页爬取
     def second_index_page(self, response):
         context = response.doc
         total_page = context.find("td.header:eq(1)").text()
         total_page = total_page[total_page.find("/") + 1:]
         basic_url = response.url
         # 循环遍历每页
-        for page in range(int("2")):
+        for page in range(int("1")):
             each_page_url = basic_url[:basic_url.rfind("-") + 1] + str(page + 1)
             self.crawl(each_page_url, callback=self.handle_each_second_index_page, cookies={
                 "Hm_lpvt_2207ecfb7b2633a3bc5c4968feb58569": "1522564279",
@@ -115,9 +115,20 @@ class Handler(BaseHandler):
     # 处理二级分类下的每一页
     def handle_each_second_index_page(self, response):
         context = response.doc
-        print()
+        notes_titles = context.find("th.thread-name")
+        for each_note in notes_titles.items():
+            if each_note is not None:
+                self.crawl(each_note("span a").attr("href"), callback=self.handle_note, cookies={
+                    "Hm_lpvt_2207ecfb7b2633a3bc5c4968feb58569": "1522564279",
+                    "Hm_lvt_2207ecfb7b2633a3bc5c4968feb58569": "1522564172",
+                    "_discuz_pw": "9a1449a8990d49a6",
+                    "_discuz_uid": "3302227",
+                    "_emuch_index": "1",
+                    "_ga": "GA1.2.1902872401.1522564172",
+                    "_gat": "1"
+                })
 
-    # 处理帖子
+    # 处理二级分类下的每一页的帖子
     def handle_note(self, response):
         # 获取整个doc
         context = response.doc
@@ -144,7 +155,7 @@ class Handler(BaseHandler):
             if note["floor"] == "1":
                 note["title"] = content_area("h1").text()
                 self.first_floor_id = note["id"]
-            target_id, content, device = self.handleContent(content_area, self.first_floor_id)
+            target_id, content, device = self.handle_content(content_area, self.first_floor_id)
             note["target_id"] = target_id
             note["content"] = content
             note["device"] = device

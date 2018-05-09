@@ -16,7 +16,7 @@ class Handler(BaseHandler):
     first_floor_id = ""
 
     # 处理帖子内容的方法，获取 回帖target_id, 帖子内容，发帖客户端
-    def handleContent(self, content_area, first_floor_id):
+    def handle_content(self, content_area, first_floor_id):
         hl_md5 = hashlib.md5()
         # 原生帖子内容, eg: 引用回帖:4楼:Originallypostedby含笑木香at2018-04-0321:08:49比如我，最喜欢暴风雨的时候睡懒觉，
         # 我也很喜欢啊，别人怕暴风雨，我是遇到暴风雨就兴奋发自小木虫IOS客户端
@@ -54,7 +54,7 @@ class Handler(BaseHandler):
 
     @every(minutes=1)
     def on_start(self):
-        self.crawl('http://muchong.com/t-12233935-1', callback=self.index_page, cookies={
+        self.crawl('http://muchong.com/t-12233935-1', callback=self.handle_note, cookies={
             "Hm_lpvt_2207ecfb7b2633a3bc5c4968feb58569": "1522564279",
             "Hm_lvt_2207ecfb7b2633a3bc5c4968feb58569": "1522564172",
             "_discuz_pw": "9a1449a8990d49a6",
@@ -65,7 +65,7 @@ class Handler(BaseHandler):
         })
 
     @config(age=1)
-    def index_page(self, response):
+    def handle_note(self, response):
         # 获取整个doc
         context = response.doc
         for each_note in context("tbody[id^='pid']").items():
@@ -91,7 +91,7 @@ class Handler(BaseHandler):
             if note["floor"] == "1":
                 note["title"] = content_area("h1").text()
                 self.first_floor_id = note["id"]
-            target_id, content, device = self.handleContent(content_area, self.first_floor_id)
+            target_id, content, device = self.handle_content(content_area, self.first_floor_id)
             note["target_id"] = target_id
             note["content"] = content
             note["device"] = device
