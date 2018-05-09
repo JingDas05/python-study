@@ -6,14 +6,11 @@
 from pyspider.libs.base_handler import *
 import hashlib
 import re
-from pyelasticsearch import ElasticSearch
 
 
 class Handler(BaseHandler):
     crawl_config = {
     }
-
-    es = ElasticSearch('http://localhost:9200/')
 
     # 楼主帖子id
     first_floor_id = ""
@@ -98,9 +95,11 @@ class Handler(BaseHandler):
             note["target_id"] = target_id
             note["content"] = content
             note["device"] = device
-            note["first_category_name"] = ""
-            note["second_category_name"] = ""
-            note["third_category_name"] = ""
-            # 就设定为虫号吧
-            note["author_id"] = ""
+            category_names = context.find("span.breadcrumb")
+            # 一级分类名称
+            note["first_category_name"] = category_names("a:eq(1)").text()
+            # 二级分类名称
+            note["second_category_name"] = category_names("a:eq(2)").text()
+            # 三级分类名称
+            note["third_category_name"] = category_names("a:eq(3)").text()
             print(note)
