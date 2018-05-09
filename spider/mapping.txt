@@ -1,3 +1,18 @@
+id: 虫号
+register_time： 注册时间
+name：虫名
+sex：性别 GG MM 或者 空
+birthday_time：生日 或者 空
+coin_num：金币数
+major：专业
+help_num： 帮助数
+grant_num：捐助数
+fans_num：粉丝数
+flower_num：鲜花数
+note_num：帖子数
+
+
+
 PUT author
 {
   "mappings": {
@@ -68,6 +83,21 @@ GET author/basic/_search
   }
 }
 
+
+building_id:为楼的id,url中的去除分页参数的id，标识一堆帖子属于一个楼
+target_id:楼层回复的目标楼层的id
+id：如果是1楼，为 building_id，其他为md5(楼层作者名字+帖子创建时间+楼层)
+author_id：帖子作者虫号
+title：帖子标题，只有1楼有
+content： 帖子内容
+floor: 楼层， 2楼为 沙发， 3楼为板凳，其他为正常楼层数
+device： 发布设备类型 IOS ANDROID PC
+first_category_name: 一级分类名字（根据面包屑获得）
+second_category_name: 二级分类名字（根据面包屑获得）
+third_category_name: 三级分类名字（根据面包屑获得）
+source_all：标题和内容混合在一起的字段（可有可无）
+
+
 PUT note
 {
   "mappings": {
@@ -77,6 +107,9 @@ PUT note
           "type": "keyword"
         },
         "target_id": {
+          "type": "keyword"
+        },
+        "building_id":{
           "type": "keyword"
         },
         "title": {
@@ -118,6 +151,11 @@ PUT note
     }
   }
 }
+
+owner_id:收花者虫号
+owner_name: 收花者名字
+sender_name：送花者名字
+flower_num： 送花者数量
 
 PUT flower
 {
