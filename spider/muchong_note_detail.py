@@ -12,22 +12,28 @@ class Handler(BaseHandler):
     crawl_config = {
     }
 
-    # 楼主帖子id
-    first_floor_id = ""
-
     # 处理帖子内容的方法，获取 回帖target_id, 帖子内容，发帖客户端
-    def handle_content(self, content_area, first_floor_id):
+    def handle_content(self, content_area, building_id):
         hl_md5 = hashlib.md5()
         # 原生帖子内容, eg: 引用回帖:4楼:Originallypostedby含笑木香at2018-04-0321:08:49比如我，最喜欢暴风雨的时候睡懒觉，
         # 我也很喜欢啊，别人怕暴风雨，我是遇到暴风雨就兴奋发自小木虫IOS客户端
         raw_content = content_area("div[class='t_fsz']").find("td:eq(0)").text().replace("\n", "").replace(" ", "")
         if (raw_content == ""):
-            return
+            target_id = ""
+            content = ""
+            device = ""
+            return target_id, content, device
         else:
             # 处理有引用回帖的情况
             if raw_content.startswith("引用回帖"):
                 # 获取引用回帖的中的日期
-                founded_date = re.search(r"(\d{4}-\d{1,2}-\d{1,2}\d{1,2}:\d{1,2}:\d{1,2})", raw_content).group(0)
+                maybe_date = re.search(r"(\d{4}-\d{1,2}-\d{1,2}\d{1,2}:\d{1,2}:\d{1,2})", raw_content)
+                if not maybe_date:
+                    target_id = ""
+                    content = ""
+                    device = ""
+                    return target_id, content, device
+                founded_date = maybe_date.group(0)
                 # 对于引用回帖的内容进行截取，key1=引用回帖: key2=at
                 reference_str = raw_content[raw_content.find("引用回帖:") + 5:raw_content.find(founded_date) - 2]
                 # 获取虫名 以及 楼层，还有上面的日期，拼接raw_id
@@ -44,7 +50,7 @@ class Handler(BaseHandler):
                     device = "PC"
                 return target_id, content, device
             else:
-                target_id = first_floor_id
+                target_id = building_id
                 content = raw_content[:raw_content.find("发自小木虫")]
                 if raw_content.find("发自小木虫") != -1:
                     device = raw_content[raw_content.find("发自小木虫") + 5:raw_content.find("客户端")]
@@ -54,7 +60,7 @@ class Handler(BaseHandler):
 
     @every(minutes=1)
     def on_start(self):
-        self.crawl('http://muchong.com/t-12233935-1', callback=self.handle_note, cookies={
+        self.crawl('http://muchong.com/t-9617476-2', callback=self.handle_note, cookies={
             "Hm_lpvt_2207ecfb7b2633a3bc5c4968feb58569": "1522564279",
             "Hm_lvt_2207ecfb7b2633a3bc5c4968feb58569": "1522564172",
             "_discuz_pw": "9a1449a8990d49a6",
@@ -66,6 +72,9 @@ class Handler(BaseHandler):
 
     @config(age=1)
     def handle_note(self, response):
+        request_url = response.url
+        building_id = request_url[request_url.rfind("/") + 1:request_url.rfind("-") + 1]
+        page_sign = request_url[request_url.rfind("-") + 1:]
         # 获取整个doc
         context = response.doc
         for each_note in context("tbody[id^='pid']").items():
@@ -73,7 +82,10 @@ class Handler(BaseHandler):
             hl_md5 = hashlib.md5()
             note = {}
             author = each_note.find("div.pls_user h3 a")
+            # 作者链接
             author_link = author.attr("href")
+            note["author_id"] = author_link[author_link.find("uid=") + 4:]
+            author_actual_link = author_link.replace("muchong.com", "muchong.com/bbs")
             # 楼层及创建时间块
             floor_time_area = each_note.find("div[class='pls_info']")
             create_time = floor_time_area("em").text()
@@ -90,11 +102,15 @@ class Handler(BaseHandler):
             # 赋值全局变量楼主帖子id
             if note["floor"] == "1":
                 note["title"] = content_area("h1").text()
-                self.first_floor_id = note["id"]
-            target_id, content, device = self.handle_content(content_area, self.first_floor_id)
-            note["target_id"] = target_id
-            note["content"] = content
-            note["device"] = device
+                # 如果是帖子的第一页,第一楼为全局id
+                if int(page_sign) == 1:
+                    note["id"] = building_id
+            print(content_area)
+            if content_area:
+                target_id, content, device = self.handle_content(content_area, building_id)
+                note["target_id"] = target_id
+                note["content"] = content
+                note["device"] = device
             category_names = context.find("span.breadcrumb")
             # 一级分类名称
             note["first_category_name"] = category_names("a:eq(1)").text()

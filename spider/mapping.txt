@@ -16,7 +16,7 @@ note_num：帖子数
 PUT author
 {
   "mappings": {
-    "basic": {
+    "project": {
       "properties": {
         "id": {
           "type": "text"
@@ -101,7 +101,7 @@ source_all：标题和内容混合在一起的字段（可有可无）
 PUT note
 {
   "mappings": {
-    "basic": {
+    "project": {
       "properties": {
         "id": {
           "type": "keyword"
@@ -146,6 +146,10 @@ PUT note
           "type": "text",
           "analyzer": "ik_max_word",
           "search_analyzer": "ik_max_word"
+        },
+        "create_time": {
+          "type": "date",
+          "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
         }
       }
     }
@@ -160,7 +164,7 @@ flower_num： 送花者数量
 PUT flower
 {
   "mappings": {
-    "relation": {
+    "project": {
       "properties": {
         "owner_id": {
           "type": "text"
